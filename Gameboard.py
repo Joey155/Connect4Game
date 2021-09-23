@@ -1,4 +1,5 @@
 import db
+import numpy as np
 
 class Gameboard():
     def __init__(self):
@@ -12,10 +13,6 @@ class Gameboard():
     '''
     Add Helper functions as needed to handle moves and update board and turns
     '''
-
-    def isValidLocation(self, col):
-        # check if a selected location on the board is valid
-        return self.board[5][col] == 0
     
     def __getNextOpenRow(self, col):
         availableRow = None
@@ -23,25 +20,29 @@ class Gameboard():
             if self.board[row][col] == 0:
                 availableRow = row
         return availableRow
+    
+    def __updateGameResult(self, playerPiece):
+        if playerPiece == self.player1:
+            self.game_result = "p1"
+        else:
+            self.game_result = "p2"   
+
+    def isValidLocation(self, col):
+        # check if a selected location on the board is valid
+        return self.board[0][col] == 0     
 
     def makeMove(self, col, playerColor):
         row = self.__getNextOpenRow(col)
-        if self.player1 == playerColor:
-            self.board[row][col] = '*'
-            self.remaining_moves -= 1
-        elif self.player2 == playerColor:
-            self.board[row][col] == '#'
-            self.remaining_moves -= 1
-
-    def isWinningMove(self):
-        playerPiece = None
-        if self.current_turn == 'p1':
-            playerPiece = '*'
+        self.board[row][col] = playerColor
+        self.remaining_moves -= 1
+        
+    def updateTurn(self, currentTurn):
+        if currentTurn == 'p1':
             self.current_turn = 'p2'
         else:
-            playerPiece = '#'
             self.current_turn = 'p1'
 
+    def isWinningMove(self, playerPiece):
         # check horizontal direction
         for col in range(7-3):
             for row in range(6):
@@ -75,8 +76,4 @@ class Gameboard():
                     self.__updateGameResult(playerPiece)
                     return True
 
-    def __updateGameResult(self, playerPiece):
-        if playerPiece == '*':
-            self.game_result = "p1"
-        else:
-            self.game_result = "p2"        
+    
