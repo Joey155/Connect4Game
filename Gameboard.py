@@ -60,15 +60,15 @@ class Gameboard():
                     return True
 
         # There are two diagonal directions
-        # Check negative diagonal direction
+        # Check positive diagonal direction
         for col in range(3, 7):
             for row in range(6-3):
                 if self.board[row][col] == playerPiece and self.board[row+1][col-1] == playerPiece and \
-                    self.board[row+2][col-2] == playerPiece and self.board[row][col] == playerPiece:
+                    self.board[row+2][col-2] == playerPiece and self.board[row+3][col-3] == playerPiece:
                     self.__updateGameResult(playerPiece)
                     return True
 
-        # Check positive diagonal direction
+        # Check negative diagonal direction
         for col in range(7-3):
             for row in range(6-3):
                 if self.board[row][col] == playerPiece and self.board[row+1][col+1] == playerPiece and \
