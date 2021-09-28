@@ -105,68 +105,26 @@ def p1_move():
     if request.method == 'POST':
         columnNumber = int(request.json['column'][-1])
         col = columnNumber - 1
-        if game.player1 != "":
-            if game.player2 != "":
-                if game.game_result == "":
-                    if game.current_turn == 'p1':
-                        if game.isValidLocation(col):
-                            game.makeMove(col, player1Color)
-                            game.updateTurn('p1')
-                            if game.isWinningMove(game.player1):
-                                return jsonify(move=game.board, invalid=False, winner=game.game_result)
-                            else:
-                                if game.remaining_moves == 0:
-                                    return jsonify(move=game.board, invalid=False, winner=game.game_result)
-                                return jsonify(move=game.board, invalid=False, winner=game.game_result)
-                        
-                        else:
-                            return jsonify(move=game.board, invalid=True, 
-                                            winner=game.game_result, reason="Invalid location")
-                    else:
-                        return jsonify(move=game.board, invalid=True, 
-                                            winner=game.game_result, reason="Sorry {} is next".format(game.current_turn))
-                else:
-                    return jsonify(move=game.board, invalid=True, 
-                                    winner=game.game_result, reason="Game Over {} won!".format(game.game_result))
-            else:
-                return jsonify(move=game.board, invalid=True, 
-                                   winner=game.game_result, reason="Player 2 must connect")
-        else:
-            return jsonify(move=game.board, invalid=True, 
-                                   winner=game.game_result, reason="Player 1 must choose color first")
+        result = game.firstPlayerMove(col, game.player1)
+        if result["winner"] != "":
+            return jsonify(move=game.board, invalid=result["invalid"], winner=result["winner"])
+        return jsonify(move=game.board, invalid=result["invalid"], winner=result["winner"], reason=result["reason"])
 
 
 '''
 Same as '/move1' but instead proccess Player 2
 '''
 
-
 @app.route('/move2', methods=['POST'])
 def p2_move():
     if request.method == 'POST':
         columnNumber = int(request.json['column'][-1])
         col = columnNumber - 1
-        if game.game_result == "":
-            if game.current_turn == 'p2':
-                if game.isValidLocation(col):
-                    game.makeMove(col, player2Color)
-                    game.updateTurn('p2')
-                    if game.isWinningMove(game.player2):
-                        return jsonify(move=game.board, invalid=False, winner=game.game_result)
-                    else:
-                        if game.remaining_moves == 0:
-                            return jsonify(move=game.board, invalid=False, winner=game.game_result)
-                        return jsonify(move=game.board, invalid=False, winner=game.game_result)
-                
-                else:
-                    return jsonify(move=game.board, invalid=True, 
-                                    winner=game.game_result, reason="Invalid location")
-            else:
-                return jsonify(move=game.board, invalid=True, 
-                                    winner=game.game_result, reason="Sorry {} is next".format(game.current_turn))
-        else:
-            return jsonify(move=game.board, invalid=True, 
-                                    winner=game.game_result, reason="Game Over {} won!".format(game.game_result))
+        result = game.secondPlayerMove(col, game.player2)
+        if result["winner"] != "":
+            return jsonify(move=game.board, invalid=result["invalid"], winner=result["winner"])
+        return jsonify(move=game.board, invalid=result["invalid"], winner=result["winner"], reason=result["reason"])
+
 
 
 

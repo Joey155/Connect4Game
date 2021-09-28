@@ -1,3 +1,4 @@
+import re
 import db
 import numpy as np
 
@@ -31,9 +32,9 @@ class Gameboard():
         # check if a selected location on the board is valid
         return self.board[0][col] == 0     
 
-    def makeMove(self, col, playerColor):
+    def makeMove(self, col, playerPiece):
         row = self.__getNextOpenRow(col)
-        self.board[row][col] = playerColor
+        self.board[row][col] = playerPiece
         self.remaining_moves -= 1
         
     def updateTurn(self, currentTurn):
@@ -41,6 +42,66 @@ class Gameboard():
             self.current_turn = 'p2'
         else:
             self.current_turn = 'p1'
+
+    def firstPlayerMove(self, col, playerPiece):
+        log = {"invalid":None, "reason":None, "winner":None}
+        if self.player1 != "":
+            if self.player2 != "":
+                if self.game_result == "":
+                    if self.current_turn == 'p1':
+                        if self.isValidLocation(col):
+                            self.makeMove(col, playerPiece)
+                            self.updateTurn('p1')
+                            _ = self.isWinningMove(playerPiece)
+                            log["invalid"] = False
+                            log["winner"] = self.game_result
+                        else:
+                            log["invalid"] = True
+                            log["reason"] = "Invalid Location"
+                            log["winner"] = self.game_result
+                    else:
+                        log["invalid"] = True
+                        log["reason"] = "{} is next".format(self.current_turn)
+                        log["winner"] = self.game_result
+                else:
+                    log["invalid"] = True
+                    log["reason"] = "Game Over! {} won".format(self.game_result)
+                    log["winner"] = self.game_result
+            else:
+                log["invalid"] = True
+                log["reason"] = "Player 2 must connect"
+                log["winner"] = self.game_result
+        else:
+            log["invalid"] = True
+            log["reason"] = "Player 1 must connect"
+            log["winner"] = self.game_result
+        
+        return log
+
+    def secondPlayerMove(self, col, playerPiece):
+        log = {"invalid":None, "reason":None, "winner":None}
+        if self.game_result == "":
+            if self.current_turn == 'p2':
+                if self.isValidLocation(col):
+                    self.makeMove(col, playerPiece)
+                    self.updateTurn('p2')
+                    _ = self.isWinningMove(playerPiece)
+                    log["invalid"] = False
+                    log["winner"] = self.game_result
+                else:
+                    log["invalid"] = True
+                    log["reason"] = "Invalid Location"
+                    log["winner"] = self.game_result
+            else:
+                log["invalid"] = True
+                log["reason"] = "{} is next".format(self.current_turn)
+                log["winner"] = self.game_result
+        else:
+            log["invalid"] = True
+            log["reason"] = "Game Over! {} won".format(self.game_result)
+            log["winner"] = self.game_result
+        
+        return log
 
     def isWinningMove(self, playerPiece):
         # check horizontal direction
@@ -75,5 +136,3 @@ class Gameboard():
                     self.board[row+2][col+2] == playerPiece and self.board[row+3][col+3] == playerPiece:
                     self.__updateGameResult(playerPiece)
                     return True
-
-    
