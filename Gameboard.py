@@ -46,9 +46,14 @@ class Gameboard():
                             if self.isValidLocation(col):
                                 self.makeMove(col, playerPiece)
                                 self.updateTurn('p1')
-                                self.isWinningMove(playerPiece)
-                                log["invalid"] = False
-                                log["winner"] = self.game_result
+                                _ = self.isWinningMove(playerPiece)
+                                if self.remaining_moves == 0:
+                                    log["invalid"] = False
+                                    log["reason"] = "Draw Game!"
+                                    log["winner"] = "Draw"
+                                else:
+                                    log["invalid"] = False
+                                    log["winner"] = self.game_result
                             else:
                                 log["invalid"] = True
                                 log["reason"] = "Invalid Location"
@@ -80,14 +85,19 @@ class Gameboard():
     def secondPlayerMove(self, col, playerPiece):
         log = {"invalid": None, "reason": None, "winner": None}
         if self.remaining_moves != 0:
-            if self.game_result == "" or self.remaining_moves != 0:
+            if self.game_result == "":
                 if self.current_turn == 'p2':
                     if self.isValidLocation(col):
                         self.makeMove(col, playerPiece)
                         self.updateTurn('p2')
                         _ = self.isWinningMove(playerPiece)
-                        log["invalid"] = False
-                        log["winner"] = self.game_result
+                        if self.remaining_moves == 0:
+                            log["invalid"] = False
+                            log["reason"] = "Draw Game!"
+                            log["winner"] = "Draw"
+                        else:
+                            log["invalid"] = False
+                            log["winner"] = self.game_result
                     else:
                         log["invalid"] = True
                         log["reason"] = "Invalid Location"
@@ -152,3 +162,4 @@ class Gameboard():
                     self.__updateGameResult(playerPiece)
                     self.winingMoveLog["direction"] = "negative diagonal"
                     return True
+        return False
