@@ -9,6 +9,29 @@ class Test_testGameboard(unittest.TestCase):
         self.game.player1 = "yellow"
         self.game.player2 = "red"
 
+    def tearDown(self):
+        self.game = None
+
+    def fillVerticalSlots(self):
+        col = 6
+        for row in range(5):
+            self.game.board[row][col] = "yellow"
+
+    def fillHorizontalSlots(self):
+        row = 5
+        for col in range(4):
+            self.game.board[row][col] = "red"
+
+    def fillPositiveDiogonal(self):
+        row = 3
+        for col in range(4):
+            self.game.board[row - col][col] = "yellow"
+
+    def fillNegativeDiagonal(self):
+        col = 2
+        for row in range(2, 6):
+            self.game.board[row-2+col][row-2+col] = "red"
+
     def testNotCurrentPlayersTurn(self):
         self.game.current_turn = "p2"
         log = self.game.firstPlayerMove(
@@ -37,16 +60,12 @@ class Test_testGameboard(unittest.TestCase):
         self.assertEqual(actualInvalidLog, expectedInvalidLog, message)
 
     def testCurrentColumnFilled(self):
-        col = 6
-        for row in range(5):
-            self.game.board[row][col] = "yellow"
+        self.fillVerticalSlots()
         isValid = self.game.isValidLocation(6)
         self.assertEqual(False, isValid)
 
     def testHorizontalWinningMove(self):
-        row = 5
-        for col in range(4):
-            self.game.board[row][col] = "red"
+        self.fillHorizontalSlots()
         _ = self.game.isWinningMove(playerPiece="red")
         expectedLog = "horizontal"
         actualLog = self.game.winingMoveLog["direction"]
@@ -54,9 +73,7 @@ class Test_testGameboard(unittest.TestCase):
         self.assertEqual(actualLog, expectedLog, message)
 
     def testVerticalWinningMove(self):
-        col = 6
-        for row in range(5):
-            self.game.board[row][col] = "yellow"
+        self.fillVerticalSlots()
         _ = self.game.isWinningMove(playerPiece="yellow")
         expectedLog = "vertical"
         actualLog = self.game.winingMoveLog["direction"]
@@ -64,9 +81,7 @@ class Test_testGameboard(unittest.TestCase):
         self.assertEqual(actualLog, expectedLog, message)
 
     def testPositiveDiagonalWinningMove(self):
-        row = 3
-        for col in range(4):
-            self.game.board[row - col][col] = "yellow"
+        self.fillPositiveDiogonal()
         _ = self.game.isWinningMove(playerPiece="yellow")
         expectedLog = "positive diagonal"
         actualLog = self.game.winingMoveLog["direction"]
@@ -74,9 +89,7 @@ class Test_testGameboard(unittest.TestCase):
         self.assertEqual(actualLog, expectedLog, message)
 
     def testNegativeDiagonalwinningMove(self):
-        col = 2
-        for row in range(2, 6):
-            self.game.board[row-2+col][row-2+col] = "red"
+        self.fillNegativeDiagonal()
         _ = self.game.isWinningMove(playerPiece="red")
         expectedLog = "negative diagonal"
         actualLog = self.game.winingMoveLog["direction"]
