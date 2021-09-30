@@ -10,3 +10,9 @@ when there is a win and a player keeps playing
 A player makes a move when it is not their turn
 
 https://vimeo.com/612276306
+
+Part 2:
+Functionality from part 1 is maintained.
+Unit tests have been provided to test winning move logics as well as edge cases.
+
+https://vimeo.com/618557556
