@@ -1,12 +1,10 @@
-from flask import Flask, render_template, request, redirect, jsonify
-from json import dump
+import logging
+from flask import Flask, render_template, request, jsonify
 from Gameboard import Gameboard
-import db
 
 
 app = Flask(__name__)
 
-import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
@@ -24,11 +22,11 @@ Initial Webpage where gameboard is initialized
 
 @app.route('/', methods=['GET'])
 def player1_connect():
-    global game 
+    global game
     game = Gameboard()
     if request.method == 'GET':
-        return render_template('player1_connect.html', status = "Pick a Color.")
-    
+        return render_template('player1_connect.html', status="Pick a Color.")
+
 
 '''
 Helper function that sends to all boards don't modify
@@ -58,7 +56,7 @@ def player1_config():
         global player1Color
         player1Color = request.args.get('color')
         game.player1 = player1Color
-        return render_template('player1_connect.html', status = player1Color)
+        return render_template('player1_connect.html', status=player1Color)
 
 
 '''
@@ -84,8 +82,7 @@ def p2Join():
                 player2Color = 'red'
             game.player2 = player2Color
             assert(game.player2 != "")
-            return render_template('p2Join.html', status = player2Color)
-    
+            return render_template('p2Join.html', status=player2Color)
 
 
 '''
@@ -107,13 +104,16 @@ def p1_move():
         col = columnNumber - 1
         result = game.firstPlayerMove(col, game.player1)
         if result["winner"] != "":
-            return jsonify(move=game.board, invalid=result["invalid"], winner=result["winner"])
-        return jsonify(move=game.board, invalid=result["invalid"], winner=result["winner"], reason=result["reason"])
+            return jsonify(move=game.board, invalid=result["invalid"],
+                           winner=result["winner"])
+        return jsonify(move=game.board, invalid=result["invalid"],
+                       winner=result["winner"], reason=result["reason"])
 
 
 '''
 Same as '/move1' but instead proccess Player 2
 '''
+
 
 @app.route('/move2', methods=['POST'])
 def p2_move():
@@ -122,10 +122,10 @@ def p2_move():
         col = columnNumber - 1
         result = game.secondPlayerMove(col, game.player2)
         if result["winner"] != "":
-            return jsonify(move=game.board, invalid=result["invalid"], winner=result["winner"])
-        return jsonify(move=game.board, invalid=result["invalid"], winner=result["winner"], reason=result["reason"])
-
-
+            return jsonify(move=game.board, invalid=result["invalid"],
+                           winner=result["winner"])
+        return jsonify(move=game.board, invalid=result["invalid"],
+                       winner=result["winner"], reason=result["reason"])
 
 
 if __name__ == '__main__':
