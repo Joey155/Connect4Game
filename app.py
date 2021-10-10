@@ -1,6 +1,8 @@
-import logging
 from flask import Flask, render_template, request, jsonify
+from json import dumps, loads
 from Gameboard import Gameboard
+import logging
+import db
 
 
 app = Flask(__name__)
@@ -11,6 +13,7 @@ log.setLevel(logging.ERROR)
 game = None
 player1Color = None
 player2Color = None
+
 
 '''
 Implement '/' endpoint
@@ -23,8 +26,17 @@ Initial Webpage where gameboard is initialized
 @app.route('/', methods=['GET'])
 def player1_connect():
     global game
+    db.init_db()
     game = Gameboard()
-    if request.method == 'GET':
+    recentGameMove = db.getMove()
+    if recentGameMove is not None:
+        game.board = loads(recentGameMove[1])
+        game.current_turn = recentGameMove[0]
+        game.player1 = recentGameMove[3]
+        game.player2 = recentGameMove[4]
+        game.remaining_moves = recentGameMove[5]
+        return render_template('player1_connect.html')
+    elif request.method == 'GET':
         return render_template('player1_connect.html', status="Pick a Color.")
 
 
@@ -103,7 +115,10 @@ def p1_move():
         columnNumber = int(request.json['column'][-1])
         col = columnNumber - 1
         result = game.firstPlayerMove(col, game.player1)
+        db.add_move((game.current_turn, dumps(game.board), game.game_result,
+                     game.player1, game.player2, game.remaining_moves))
         if result["winner"] != "":
+            db.clear()
             return jsonify(move=game.board, invalid=result["invalid"],
                            winner=result["winner"])
         return jsonify(move=game.board, invalid=result["invalid"],
@@ -121,7 +136,10 @@ def p2_move():
         columnNumber = int(request.json['column'][-1])
         col = columnNumber - 1
         result = game.secondPlayerMove(col, game.player2)
+        db.add_move((game.current_turn, dumps(game.board), game.game_result,
+                     game.player1, game.player2, game.remaining_moves))
         if result["winner"] != "":
+            db.clear()
             return jsonify(move=game.board, invalid=result["invalid"],
                            winner=result["winner"])
         return jsonify(move=game.board, invalid=result["invalid"],
