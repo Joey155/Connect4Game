@@ -13,10 +13,11 @@ class Test_testdb(unittest.TestCase):
 
     def tearDown(self):
         self.game = None
+        db.clear()
 
     def setBoard(self):
         col = 6
-        for row in range(5):
+        for row in range(6):
             if row % 2 == 1:
                 self.game.board[row][col] = self.game.player1
                 self.game.updateTurn("p1")
@@ -25,6 +26,7 @@ class Test_testdb(unittest.TestCase):
                 self.game.board[row][col] = self.game.player2
                 self.game.updateTurn("p2")
                 self.game.remaining_moves -= 1
+        print(json.dumps(self.game.board))
         return (self.game.current_turn, json.dumps(self.game.board), 
                 self.game.game_result, self.game.player1, self.game.player2,
                 self.game.remaining_moves)
@@ -32,13 +34,16 @@ class Test_testdb(unittest.TestCase):
     def test_addMove(self):
         move = self.setBoard()
         cur = db.add_move(move)
-        cur.execute('''SELECT * from GAME''')
-        result = cur.fetchone()
-        self.assertEqual(json.loads(move[1]), json.loads(result[1])) 
+        cur.execute('SELECT COUNT(*) from GAME')
+        cur_result = cur.fetchone()
+        rows = cur_result[0]
+        self.assertEqual(rows, 1)
 
-        
     def test_getMove(self):
-        pass
+        move = self.setBoard()
+        _ = db.add_move(move)
+        result = db.getMove()
+        self.assertEqual(json.loads(move[1]), json.loads(result[1])) 
 
 
 if __name__ == '__main__':
