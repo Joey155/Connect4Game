@@ -6,6 +6,8 @@ from Gameboard import Gameboard
 
 class Test_testdb(unittest.TestCase):
     def setUp(self):
+        if db.tableIsPresent("sqlite_db"):
+            db.clear()
         db.init_db()
         self.game = Gameboard()
         self.game.player1 = "yellow"
@@ -26,11 +28,14 @@ class Test_testdb(unittest.TestCase):
                 self.game.board[row][col] = self.game.player2
                 self.game.updateTurn("p2")
                 self.game.remaining_moves -= 1
-        print(json.dumps(self.game.board))
-        return (self.game.current_turn, json.dumps(self.game.board), 
+        return (self.game.current_turn, json.dumps(self.game.board),
                 self.game.game_result, self.game.player1, self.game.player2,
                 self.game.remaining_moves)
-    
+
+    def test_createConnection(self):
+        conn = db.create_connection("nonexistent_db")
+        self.assertEqual(conn, None)
+
     def test_addMove(self):
         move = self.setBoard()
         cur = db.add_move(move)
@@ -43,7 +48,7 @@ class Test_testdb(unittest.TestCase):
         move = self.setBoard()
         _ = db.add_move(move)
         result = db.getMove()
-        self.assertEqual(json.loads(move[1]), json.loads(result[1])) 
+        self.assertEqual(json.loads(move[1]), json.loads(result[1]))
 
 
 if __name__ == '__main__':

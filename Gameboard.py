@@ -30,6 +30,7 @@ class Gameboard():
         row = self.__getNextOpenRow(col)
         self.board[row][col] = playerPiece
         self.remaining_moves -= 1
+        return row
 
     def updateTurn(self, currentTurn):
         if currentTurn == 'p1':
@@ -37,86 +38,74 @@ class Gameboard():
         else:
             self.current_turn = 'p1'
 
-    def firstPlayerMove(self, col, playerPiece):
-        log = {"invalid": None, "reason": None, "winner": None}
-        if self.player1 != "":
-            if self.player2 != "":
-                if self.remaining_moves != 0:
-                    if self.game_result == "":
-                        if self.current_turn == 'p1':
-                            if self.isValidLocation(col):
-                                self.makeMove(col, playerPiece)
-                                self.updateTurn('p1')
-                                _ = self.isWinningMove(playerPiece)
-                                if self.remaining_moves == 0:
-                                    log["invalid"] = False
-                                    log["reason"] = "Draw Game!"
-                                    log["winner"] = "Draw"
-                                else:
-                                    log["invalid"] = False
-                                    log["winner"] = self.game_result
-                            else:
-                                log["invalid"] = True
-                                log["reason"] = "Invalid Location"
-                                log["winner"] = self.game_result
-                        else:
-                            log["invalid"] = True
-                            log["reason"] = "{} is next".format(
-                                self.current_turn)
-                            log["winner"] = self.game_result
-                    else:
-                        log["invalid"] = True
-                        log["reason"] = "Game Over! Winner declared."
-                        log["winner"] = self.game_result
-                else:
-                    log["invalid"] = True
-                    log["reason"] = "Game Over! Draw game."
-                    log["winner"] = self.game_result
-            else:
-                log["invalid"] = True
-                log["reason"] = "Player 2 must connect"
-                log["winner"] = self.game_result
-        else:
-            log["invalid"] = True
-            log["reason"] = "Player 1 must connect"
-            log["winner"] = self.game_result
-
+    def __makeLog(self, row, invalid, reason, winner):
+        log = {"row": None, "invalid": None, "reason": None, "winner": None}
+        log["row"] = row
+        log["invalid"] = invalid
+        log["reason"] = reason
+        log["winner"] = winner
         return log
+
+    def firstPlayerMove(self, col, playerPiece):
+        if self.player1 == "":
+            return self.__makeLog(None, True, "Player 1 must connect",
+                                  self.game_result)
+        elif self.player2 == "":
+            return self.__makeLog(None, True, "Player 2 must connect",
+                                  self.game_result)
+
+        elif self.remaining_moves == 0:
+            return self.__makeLog(None, True, "Game Over! Draw game.",
+                                  self.game_result)
+
+        elif self.game_result != "":
+            return self.__makeLog(None, True, "Game Over! Winner declared.",
+                                  self.game_result)
+
+        elif self.current_turn != 'p1':
+            return self.__makeLog(None, True,
+                                  "{} is next".format(self.current_turn),
+                                  self.game_result)
+
+        elif not self.isValidLocation(col):
+            return self.__makeLog(None, True, "Invalid Location",
+                                  self.game_result)
+
+        else:
+            row = self.makeMove(col, playerPiece)
+            self.updateTurn('p1')
+            _ = self.isWinningMove(playerPiece)
+            if self.remaining_moves == 0:
+                return self.__makeLog(row, False, "Draw Game!", "Draw")
+            else:
+                return self.__makeLog(row, False, "", self.game_result)
 
     def secondPlayerMove(self, col, playerPiece):
-        log = {"invalid": None, "reason": None, "winner": None}
-        if self.remaining_moves != 0:
-            if self.game_result == "":
-                if self.current_turn == 'p2':
-                    if self.isValidLocation(col):
-                        self.makeMove(col, playerPiece)
-                        self.updateTurn('p2')
-                        _ = self.isWinningMove(playerPiece)
-                        if self.remaining_moves == 0:
-                            log["invalid"] = False
-                            log["reason"] = "Draw Game!"
-                            log["winner"] = "Draw"
-                        else:
-                            log["invalid"] = False
-                            log["winner"] = self.game_result
-                    else:
-                        log["invalid"] = True
-                        log["reason"] = "Invalid Location"
-                        log["winner"] = self.game_result
-                else:
-                    log["invalid"] = True
-                    log["reason"] = "{} is next".format(self.current_turn)
-                    log["winner"] = self.game_result
-            else:
-                log["invalid"] = True
-                log["reason"] = "Game Over! Winner declared."
-                log["winner"] = self.game_result
-        else:
-            log["invalid"] = True
-            log["reason"] = "Game Over! Draw game."
-            log["winner"] = self.game_result
+        if self.remaining_moves == 0:
+            return self.__makeLog(None, True, "Game Over! Draw game.",
+                                  self.game_result)
 
-        return log
+        elif self.game_result != "":
+            return self.__makeLog(None, True, "Game Over! Winner declared.",
+                                  self.game_result)
+
+        elif self.current_turn != 'p2':
+            return self.__makeLog(None, True,
+                                  "{} is next".format(self.current_turn),
+                                  self.game_result)
+
+        elif not self.isValidLocation(col):
+            return self.__makeLog(None, True, "Invalid Location",
+                                  self.game_result)
+
+        else:
+            row = self.makeMove(col, playerPiece)
+            self.updateTurn('p2')
+            _ = self.isWinningMove(playerPiece)
+            if self.remaining_moves == 0:
+                return self.__makeLog(row, False, "Draw Game!", "Draw")
+            else:
+                return self.__makeLog(row, False, "", self.game_result)
 
     def isWinningMove(self, playerPiece):
         # check horizontal direction

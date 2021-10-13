@@ -22,13 +22,8 @@ return: template player1_connect.html and status = "Pick a Color."
 Initial Webpage where gameboard is initialized
 '''
 
-
-@app.route('/', methods=['GET'])
-def player1_connect():
-    global game
-    db.init_db()
-    game = Gameboard()
-    recentGameMove = db.getMove()
+'''
+recentGameMove = db.getMove()
     if recentGameMove is not None:
         game.board = loads(recentGameMove[1])
         game.current_turn = recentGameMove[0]
@@ -36,7 +31,15 @@ def player1_connect():
         game.player2 = recentGameMove[4]
         game.remaining_moves = recentGameMove[5]
         return render_template('player1_connect.html')
-    elif request.method == 'GET':
+'''
+
+
+@app.route('/', methods=['GET'])
+def player1_connect():
+    global game
+    game = Gameboard()
+    db.clear()
+    if request.method == 'GET':
         return render_template('player1_connect.html', status="Pick a Color.")
 
 
@@ -64,7 +67,19 @@ Assign player1 their color
 
 @app.route('/p1Color', methods=['GET'])
 def player1_config():
-    if request.method == 'GET':
+    isPresent = db.tableIsPresent("sqlite_db")
+    if isPresent:
+        global game
+        game = Gameboard()
+        recentGameMove = db.getMove()
+        game.board = loads(recentGameMove[1])
+        game.current_turn = recentGameMove[0]
+        game.player1 = recentGameMove[3]
+        game.player2 = recentGameMove[4]
+        game.remaining_moves = recentGameMove[5]
+        return render_template('player1_connect.html',
+                               status=recentGameMove[3])
+    elif request.method == 'GET':
         global player1Color
         player1Color = request.args.get('color')
         game.player1 = player1Color
@@ -111,6 +126,7 @@ Process Player 1's move
 
 @app.route('/move1', methods=['POST'])
 def p1_move():
+    db.init_db()
     if request.method == 'POST':
         columnNumber = int(request.json['column'][-1])
         col = columnNumber - 1
@@ -118,7 +134,6 @@ def p1_move():
         db.add_move((game.current_turn, dumps(game.board), game.game_result,
                      game.player1, game.player2, game.remaining_moves))
         if result["winner"] != "":
-            db.clear()
             return jsonify(move=game.board, invalid=result["invalid"],
                            winner=result["winner"])
         return jsonify(move=game.board, invalid=result["invalid"],
@@ -132,6 +147,7 @@ Same as '/move1' but instead proccess Player 2
 
 @app.route('/move2', methods=['POST'])
 def p2_move():
+    db.init_db()
     if request.method == 'POST':
         columnNumber = int(request.json['column'][-1])
         col = columnNumber - 1
@@ -139,7 +155,6 @@ def p2_move():
         db.add_move((game.current_turn, dumps(game.board), game.game_result,
                      game.player1, game.player2, game.remaining_moves))
         if result["winner"] != "":
-            db.clear()
             return jsonify(move=game.board, invalid=result["invalid"],
                            winner=result["winner"])
         return jsonify(move=game.board, invalid=result["invalid"],

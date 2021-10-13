@@ -1,5 +1,6 @@
 import sqlite3
 from sqlite3 import Error
+import os
 
 '''
 Initializes the Table GAME
@@ -32,7 +33,7 @@ Insert Tuple into table
 
 
 def add_move(move):  # will take in a tuple
-    conn = __create_connection('sqlite_db')
+    conn = create_connection('sqlite_db')
     sqlite_insert_query = """INSERT INTO GAME
                              (current_turn, board, winner,
                              player1, player2, remaining_moves)
@@ -51,7 +52,7 @@ return (current_turn, board, winner, player1, player2, remaining_moves)
 def getMove():
     # will return tuple(current_turn, board, winner, player1, player2,
     # remaining_moves) or None if db fails
-    conn = __create_connection('sqlite_db')
+    conn = create_connection('sqlite_db')
     last_move = None
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM GAME ORDER BY ROWID DESC LIMIT 1")
@@ -79,10 +80,23 @@ def clear():
             conn.close()
 
 
-def __create_connection(db_file):
+def create_connection(db_file):
     conn = None
     try:
-        conn = sqlite3.connect(db_file)
+        if os.path.exists(db_file):
+            conn = sqlite3.connect(db_file)
     except Error as e:
         print(e)
     return conn
+
+
+def tableIsPresent(db_file):
+    conn = create_connection(db_file)
+    cur = conn.cursor()
+    cur.execute("SELECT name FROM sqlite_master\
+                 WHERE type='table' AND name='GAME'")
+    result = cur.fetchone()
+    if result is None:
+        return False
+    else:
+        return True

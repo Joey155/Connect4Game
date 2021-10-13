@@ -32,6 +32,20 @@ class Test_testGameboard(unittest.TestCase):
         for row in range(2, 6):
             self.game.board[row-2+col][row-2+col] = "red"
 
+    def testFirstPlayerMakeMove(self):
+        col = 1
+        self.game.current_turn = "p1"
+        log = self.game.firstPlayerMove(col, self.game.player1)
+        row = log["row"]
+        self.assertEqual(self.game.board[row][col], self.game.player1)
+
+    def testSecondPlayerMakeMove(self):
+        col = 2
+        self.game.current_turn = "p2"
+        log = self.game.secondPlayerMove(col, self.game.player2)
+        row = log["row"]
+        self.assertEqual(self.game.board[row][col], self.game.player2)
+
     def testNotCurrentPlayersTurn(self):
         self.game.current_turn = "p2"
         log = self.game.firstPlayerMove(
