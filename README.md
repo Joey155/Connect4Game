@@ -13,3 +13,6 @@ https://vimeo.com/612276306
 
 Part 3:
 https://vimeo.com/627917869
+
+I did not take the rubrics into account in the first video. This new video runs according to the rubrics:
+https://vimeo.com/630623910
